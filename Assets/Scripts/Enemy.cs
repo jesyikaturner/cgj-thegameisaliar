@@ -38,17 +38,27 @@ public class Enemy : Character
                 GainHealth(healthGainAmount * Time.deltaTime);
                 if(OnRangeEnter(7f))
                 {
+                    transform.LookAt(target);
                     behaviour = Behaviour.Attack;
                 }
                 break;
             case Behaviour.Attack:
                 // moves towards the target.
                 transform.position = Vector3.MoveTowards(transform.position, target.position, characterSpeed * Time.deltaTime);
+                if (!IsWithinDistanceOfTarget(target, 7f))
+                {
+                    transform.LookAt(startPosition);
+                    // if the enemies get far enough away from the player, it forgets the player
+                    target = null;
+                    // then it goes back to looking for a new target.
+                    behaviour = Behaviour.Look;
+                }
                 break;
             case Behaviour.Flee:
                 transform.position = Vector3.MoveTowards(transform.position, startPosition, characterSpeed * Time.deltaTime);
-                if (Vector3.Distance(transform.position, target.position) > 7f)
+                if(!IsWithinDistanceOfTarget(target, 7f))
                 {
+                    transform.LookAt(startPosition);
                     // if the enemies get far enough away from the player, it forgets the player
                     target = null;
                     // then it goes back to looking for a new target.
@@ -60,6 +70,15 @@ public class Enemy : Character
                 Debug.Break();
                 break;
         }
+    }
+
+    private bool IsWithinDistanceOfTarget(Transform target, float distance)
+    {
+        if(Vector3.Distance(transform.position, this.target.position) <= distance)
+        {
+            return true;
+        }
+        return false;
     }
 
     private bool OnRangeEnter(float radius)
